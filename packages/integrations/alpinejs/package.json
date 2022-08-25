@@ -14,7 +14,9 @@
   "keywords": [
     "astro-integration",
     "astro-component",
-    "performance"
+    "renderer",
+    "alpine.js",
+    "alpine"
   ],
   "bugs": "https://github.com/withastro/astro/issues",
   "homepage": "https://astro.build",
