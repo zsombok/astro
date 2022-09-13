@@ -11,6 +11,7 @@ defaults:
 env:
   TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
   TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
+  NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
   FORCE_COLOR: true
 
 jobs:
@@ -76,9 +77,6 @@ jobs:
       - name: Publish Release
         id: publish
         run: echo "::set-output name=result::$(pnpm run release --tag next--${{ steps.getSnapshotName.outputs.result }})"
-        env:
-          # Needs access to publish to npm
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Pull Request Notification
         uses: actions/github-script@v6
@@ -86,10 +84,9 @@ jobs:
           MESSAGE: ${{ steps.publish.outputs.result }}
         with:
           script: |
-            console.log(process.env.MESSAGE);
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: '```\n' + process.env.MESSAGE + '\n```',
+              body: '```\n' + process.env.MESSAGE || 'Something went wrong!' + '\n```',
             })
