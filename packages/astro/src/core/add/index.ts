@@ -30,7 +30,6 @@ import { wrapDefaultExport } from './wrapper.js';
 export interface AddOptions {
 	logging: LogOptions;
 	flags: yargs.Arguments;
-	telemetry: AstroTelemetry;
 	cwd?: string;
 }
 
@@ -83,7 +82,7 @@ async function getRegistry(): Promise<string> {
 	return stdout || 'https://registry.npmjs.org';
 }
 
-export default async function add(names: string[], { cwd, flags, logging, telemetry }: AddOptions) {
+export default async function add(names: string[], { cwd, flags, logging }: AddOptions) {
 	applyPolyfill();
 	if (flags.help || names.length === 0) {
 		printHelp({

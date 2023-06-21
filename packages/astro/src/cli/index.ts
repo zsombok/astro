@@ -3,22 +3,9 @@ import fs from 'fs';
 import * as colors from 'kleur/colors';
 import type { Arguments as Flags } from 'yargs-parser';
 import yargs from 'yargs-parser';
-import { ZodError } from 'zod';
-import {
-	createSettings,
-	openConfig,
-	resolveConfigPath,
-	resolveFlags,
-} from '../core/config/index.js';
 import { ASTRO_VERSION } from '../core/constants.js';
-import { collectErrorMetadata } from '../core/errors/dev/index.js';
-import { createSafeError } from '../core/errors/index.js';
 import { debug, error, info, type LogOptions } from '../core/logger/core.js';
 import { enableVerboseLogging, nodeLogDestination } from '../core/logger/node.js';
-import { formatConfigErrorMessage, formatErrorMessage, printHelp } from '../core/messages.js';
-import * as event from '../events/index.js';
-import { eventConfigError, eventError, telemetry } from '../events/index.js';
-import { openInBrowser } from './open.js';
 
 type Arguments = yargs.Arguments;
 type CLICommand =
@@ -35,7 +22,8 @@ type CLICommand =
 	| 'telemetry';
 
 /** Display --help flag */
-function printAstroHelp() {
+async function printAstroHelp() {
+	const { printHelp } = await import('../core/messages.js');
 	printHelp({
 		commandName: 'astro',
 		usage: '[command] [...flags]',
@@ -96,13 +84,20 @@ async function handleConfigError(
 	e: any,
 	{ cmd, cwd, flags, logging }: { cmd: string; cwd?: string; flags?: Flags; logging: LogOptions }
 ) {
+	const { resolveConfigPath } = await import('../core/config/index.js');
 	const path = await resolveConfigPath({ cwd, flags, fs });
 	error(logging, 'astro', `Unable to load ${path ? colors.bold(path) : 'your Astro config'}\n`);
+
+	const { ZodError } = await import('zod');
+	const { formatConfigErrorMessage, formatErrorMessage } = await import('../core/messages.js');
 	if (e instanceof ZodError) {
 		console.error(formatConfigErrorMessage(e) + '\n');
 	} else if (e instanceof Error) {
+		const { collectErrorMetadata } = await import('../core/errors/dev/index.js');
 		console.error(formatErrorMessage(collectErrorMetadata(e)) + '\n');
 	}
+
+	const { eventConfigError, telemetry } = await import('../events/index.js');
 	const telemetryPromise = telemetry.record(eventConfigError({ cmd, err: e, isFatal: true }));
 	await telemetryPromise.catch((err2: Error) =>
 		debug('telemetry', `record() error: ${err2.message}`)
@@ -119,7 +114,7 @@ async function runCommand(cmd: string, flags: yargs.Arguments) {
 
 	switch (cmd) {
 		case 'help':
-			printAstroHelp();
+			await printAstroHelp();
 			return process.exit(0);
 		case 'version':
 			await printVersion();
@@ -146,13 +141,19 @@ async function runCommand(cmd: string, flags: yargs.Arguments) {
 		case 'add': {
 			const { default: add } = await import('../core/add/index.js');
 
-			telemetry.record(event.eventCliSession(cmd));
+			import('../events/index.js').then(({ eventCliSession, telemetry }) => {
+				telemetry.record(eventCliSession(cmd));
+			});
+
 			const packages = flags._.slice(3) as string[];
-			return await add(packages, { cwd: root, flags, logging, telemetry });
+			return await add(packages, { cwd: root, flags, logging });
 		}
 		case 'docs': {
-			telemetry.record(event.eventCliSession(cmd));
+			import('../events/index.js').then(({ eventCliSession, telemetry }) => {
+				telemetry.record(eventCliSession(cmd));
+			});
 			if (flags.help || flags.h) {
+				const { printHelp } = await import('../core/messages.js');
 				printHelp({
 					commandName: 'astro docs',
 					tables: {
@@ -162,6 +163,7 @@ async function runCommand(cmd: string, flags: yargs.Arguments) {
 				});
 				return;
 			}
+			const { openInBrowser } = await import('./open.js');
 			return await openInBrowser('https://docs.astro.build/');
 		}
 		case 'telemetry': {
@@ -170,6 +172,7 @@ async function runCommand(cmd: string, flags: yargs.Arguments) {
 			// Do not track session start, since the user may be trying to enable,
 			// disable, or modify telemetry settings.
 			const subcommand = flags._[3]?.toString();
+			const { telemetry } = await import('../events/index.js');
 			return await telemetryHandler.update(subcommand, { flags, telemetry });
 		}
 	}
@@ -179,6 +182,7 @@ async function runCommand(cmd: string, flags: yargs.Arguments) {
 		process.env.NODE_ENV = cmd === 'dev' ? 'development' : 'production';
 	}
 
+	const { openConfig } = await import('../core/config/index.js');
 	let { astroConfig: initialAstroConfig, userConfig: initialUserConfig } = await openConfig({
 		cwd: root,
 		flags,
@@ -189,7 +193,10 @@ async function runCommand(cmd: string, flags: yargs.Arguments) {
 		return {} as any;
 	});
 	if (!initialAstroConfig) return;
-	telemetry.record(event.eventCliSession(cmd, initialUserConfig, flags));
+	import('../events/index.js').then(({ eventCliSession, telemetry }) => {
+		telemetry.record(eventCliSession(cmd, initialUserConfig, flags));
+	});
+	const { createSettings } = await import('../core/config/index.js');
 	let settings = createSettings(initialAstroConfig, root);
 
 	// Common CLI Commands:
@@ -198,6 +205,8 @@ async function runCommand(cmd: string, flags: yargs.Arguments) {
 	switch (cmd) {
 		case 'dev': {
 			const { default: devServer } = await import('../core/dev/index.js');
+			const { telemetry } = await import('../events/index.js');
+			const { resolveFlags, resolveConfigPath } = await import('../core/config/index.js');
 
 			const configFlag = resolveFlags(flags).config;
 			const configFlagPath = configFlag
@@ -220,6 +229,7 @@ async function runCommand(cmd: string, flags: yargs.Arguments) {
 
 		case 'build': {
 			const { default: build } = await import('../core/build/index.js');
+			const { telemetry } = await import('../events/index.js');
 
 			return await build(settings, {
 				flags,
@@ -255,6 +265,7 @@ async function runCommand(cmd: string, flags: yargs.Arguments) {
 
 		case 'preview': {
 			const { default: preview } = await import('../core/preview/index.js');
+			const { telemetry } = await import('../events/index.js');
 
 			const server = await preview(settings, { logging, telemetry, flags });
 			if (server) {
@@ -287,6 +298,11 @@ async function throwAndExit(cmd: string, err: unknown) {
 		console.error(errorMessage);
 		process.exit(1);
 	}
+
+	const { collectErrorMetadata } = await import('../core/errors/dev/index.js');
+	const { createSafeError } = await import('../core/errors/index.js');
+	const { eventError, telemetry } = await import('../events/index.js');
+	const { formatErrorMessage } = await import('../core/messages.js');
 
 	const errorWithMetadata = collectErrorMetadata(createSafeError(err));
 	telemetryPromise = telemetry.record(eventError({ cmd, err: errorWithMetadata, isFatal: true }));
