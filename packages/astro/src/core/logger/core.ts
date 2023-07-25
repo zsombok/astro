@@ -127,3 +127,32 @@ export function timerMessage(message: string, startTime: number = Date.now()) {
 		timeDiff < 750 ? `${Math.round(timeDiff)}ms` : `${(timeDiff / 1000).toFixed(1)}s`;
 	return `${message}   ${dim(timeDisplay)}`;
 }
+
+export class Logger {
+	type: string;
+	options: LogOptions;
+	constructor(type: string, options: LogOptions) {
+		this.type = type;
+		this.options = options;
+	}
+
+	/**
+	 * Creates a new Logger instance using the same log options
+	 */
+	fork(type: string): Logger {
+		return new Logger(type, this.options);
+	}
+
+	info(message: string) {
+		info(this.options, this.type, message);
+	}
+	warn(message: string) {
+		warn(this.options, this.type, message);
+	}
+	error(message: string) {
+		error(this.options, this.type, message);
+	}
+	debug(message: string) {
+		debug(this.options, this.type, message);
+	}
+}
