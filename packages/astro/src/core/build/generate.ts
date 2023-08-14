@@ -526,6 +526,7 @@ async function generatePath(
 		},
 		routeCache,
 		site: manifest.site,
+		base: manifest.base,
 		ssr,
 		streaming: true,
 	});

@@ -38,7 +38,7 @@ describe('Prerender', () => {
 				const $ = cheerio.load(html);
 
 				expect($('#props').text()).to.equal('10');
-				expect($('#url').text()).to.equal('/blog/food/tacos/');
+				expect($('#url').text()).to.equal('/blog/food/tacos');
 			});
 		});
 
@@ -169,7 +169,7 @@ describe('Prerender', () => {
 				const $ = cheerio.load(html);
 
 				expect($('#props').text()).to.equal('10');
-				expect($('#url').text()).to.equal('/blog/food/tacos/');
+				expect($('#url').text()).to.equal('/blog/food/tacos');
 			});
 		});
 

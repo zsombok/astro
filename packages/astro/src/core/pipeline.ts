@@ -10,6 +10,7 @@ import type {
 } from '../@types/astro';
 import { callMiddleware } from './middleware/callMiddleware.js';
 import { renderPage } from './render/core.js';
+import { createRouteUrl } from './routing/url.js';
 
 type EndpointResultHandler = (
 	originalRequest: Request,
@@ -95,11 +96,18 @@ export class Pipeline {
 		mod: Readonly<ComponentInstance>,
 		onRequest?: MiddlewareHandler<MiddlewareReturnType>
 	): Promise<Response | EndpointCallResult> {
+		const routeUrl = createRouteUrl(renderContext.route, {
+			params: renderContext.params,
+			base: env.base,
+			site: env.site ?? new URL(renderContext.request.url).origin,
+		});
+		
 		const apiContext = createAPIContext({
 			request: renderContext.request,
 			params: renderContext.params,
 			props: renderContext.props,
 			site: env.site,
+			routeUrl,
 			adapterName: env.adapterName,
 		});
 

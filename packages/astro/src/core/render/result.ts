@@ -36,6 +36,10 @@ export interface CreateResultArgs {
 	 * Used for `Astro.site`
 	 */
 	site: string | undefined;
+	/**
+	 * Used for `Astro.url`. A stable route usually derived from `RouteData`.
+	 */
+	routeUrl: URL;
 	links?: Set<SSRElement>;
 	scripts?: Set<SSRElement>;
 	styles?: Set<SSRElement>;
@@ -126,7 +130,6 @@ class Slots {
 export function createResult(args: CreateResultArgs): SSRResult {
 	const { params, request, resolve, locals } = args;
 
-	const url = new URL(request.url);
 	const headers = new Headers();
 	headers.set('Content-Type', 'text/html');
 	const response: ResponseInit = {
@@ -195,7 +198,7 @@ export function createResult(args: CreateResultArgs): SSRResult {
 				props,
 				locals,
 				request,
-				url,
+				url: args.routeUrl,
 				redirect(path, status) {
 					// If the response is already sent, error as we cannot proceed with the redirect.
 					if ((request as any)[responseSentSymbol]) {

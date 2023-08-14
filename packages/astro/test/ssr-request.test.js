@@ -50,8 +50,8 @@ describe('Using Astro.request in SSR', () => {
 		const html = await response.text();
 		const $ = cheerioLoad(html);
 		expect($('#origin').text()).to.equal('http://example.com');
-		expect($('#pathname').text()).to.equal('/subpath/request/');
-		expect($('#request-pathname').text()).to.equal('/subpath/request/');
+		expect($('#pathname').text()).to.equal('/subpath/request');
+		expect($('#request-pathname').text()).to.equal('/subpath/request');
 	});
 
 	it('public file is copied over', async () => {

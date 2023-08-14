@@ -25,6 +25,7 @@ export function createDevelopmentEnvironment(
 		resolve: createResolve(loader, settings.config.root),
 		routeCache: new RouteCache(logging, mode),
 		site: manifest.site,
+		base: manifest.base,
 		ssr: isServerLikeOutput(settings.config),
 		streaming: true,
 	});

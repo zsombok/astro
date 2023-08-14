@@ -11,6 +11,7 @@ import { attachCookiesToResponse } from '../cookies/index.js';
 import { callEndpoint, createAPIContext, type EndpointCallResult } from '../endpoint/index.js';
 import { callMiddleware } from '../middleware/callMiddleware.js';
 import { redirectRouteGenerate, redirectRouteStatus, routeIsRedirect } from '../redirects/index.js';
+import { createRouteUrl } from '../routing/url.js';
 import type { RenderContext } from './context.js';
 import type { Environment } from './environment.js';
 import { createResult } from './result.js';
@@ -37,11 +38,18 @@ export async function renderPage({ mod, renderContext, env, cookies }: RenderPag
 	if (!Component)
 		throw new Error(`Expected an exported Astro component but received typeof ${typeof Component}`);
 
+	const routeUrl = createRouteUrl(renderContext.route, {
+		params: renderContext.params,
+		base: env.base,
+		site: env.site ?? new URL(renderContext.request.url).origin,
+	});
+
 	const result = createResult({
 		adapterName: env.adapterName,
 		links: renderContext.links,
 		styles: renderContext.styles,
 		logging: env.logging,
+		routeUrl,
 		params: renderContext.params,
 		pathname: renderContext.pathname,
 		componentMetadata: renderContext.componentMetadata,
@@ -93,11 +101,18 @@ export async function tryRenderRoute<MiddlewareReturnType = Response>(
 	mod: Readonly<ComponentInstance>,
 	onRequest?: MiddlewareHandler<MiddlewareReturnType>
 ): Promise<Response | EndpointCallResult> {
+	const routeUrl = createRouteUrl(renderContext.route, {
+		params: renderContext.params,
+		base: env.base,
+		site: env.site ?? new URL(renderContext.request.url).origin,
+	});
+
 	const apiContext = createAPIContext({
 		request: renderContext.request,
 		params: renderContext.params,
 		props: renderContext.props,
 		site: env.site,
+		routeUrl,
 		adapterName: env.adapterName,
 	});
 

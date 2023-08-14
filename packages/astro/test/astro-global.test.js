@@ -24,16 +24,16 @@ describe('Astro Global', () => {
 			await devServer.stop();
 		});
 
-		it('Astro.request.url', async () => {
+		it('Astro.url', async () => {
 			const res = await await fixture.fetch('/blog/?foo=42');
 			expect(res.status).to.equal(200);
 
 			const html = await res.text();
 			const $ = cheerio.load(html);
-			expect($('#pathname').text()).to.equal('/blog/');
+			expect($('#pathname').text()).to.equal('/blog');
 			expect($('#searchparams').text()).to.equal('{}');
-			expect($('#child-pathname').text()).to.equal('/blog/');
-			expect($('#nested-child-pathname').text()).to.equal('/blog/');
+			expect($('#child-pathname').text()).to.equal('/blog');
+			expect($('#nested-child-pathname').text()).to.equal('/blog');
 		});
 
 		it('Astro.glob() returned `url` metadata of each markdown file extensions DOES NOT include the extension', async () => {

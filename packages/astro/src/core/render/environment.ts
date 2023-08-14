@@ -27,6 +27,10 @@ export interface Environment {
 	 */
 	site?: string;
 	/**
+	 * Used to derive `Astro.url`
+	 */
+	base?: string;
+	/**
 	 * Value of Astro config's `output` option, true if "server" or "hybrid"
 	 */
 	ssr: boolean;

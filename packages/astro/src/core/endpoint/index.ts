@@ -13,6 +13,7 @@ import { AstroCookies, attachCookiesToResponse } from '../cookies/index.js';
 import { AstroError, AstroErrorData } from '../errors/index.js';
 import { warn } from '../logger/core.js';
 import { callMiddleware } from '../middleware/callMiddleware.js';
+import { createRouteUrl } from '../routing/url.js';
 
 const clientAddressSymbol = Symbol.for('astro.clientAddress');
 const clientLocalsSymbol = Symbol.for('astro.locals');
@@ -31,6 +32,7 @@ type CreateAPIContext = {
 	request: Request;
 	params: Params;
 	site?: string;
+	routeUrl: URL;
 	props: Record<string, any>;
 	adapterName?: string;
 };
@@ -44,6 +46,7 @@ export function createAPIContext({
 	request,
 	params,
 	site,
+	routeUrl,
 	props,
 	adapterName,
 }: CreateAPIContext): APIContext {
@@ -62,7 +65,7 @@ export function createAPIContext({
 				},
 			});
 		},
-		url: new URL(request.url),
+		url: routeUrl,
 		get clientAddress() {
 			if (!(clientAddressSymbol in request)) {
 				if (adapterName) {
@@ -102,11 +105,18 @@ export async function callEndpoint<MiddlewareResult = Response | EndpointOutput>
 	ctx: RenderContext,
 	onRequest?: MiddlewareHandler<MiddlewareResult> | undefined
 ): Promise<EndpointCallResult> {
+	const routeUrl = createRouteUrl(ctx.route, {
+		params: ctx.params,
+		base: env.base,
+		site: env.site ?? new URL(ctx.request.url).origin,
+	});
+
 	const context = createAPIContext({
 		request: ctx.request,
 		params: ctx.params,
 		props: ctx.props,
 		site: env.site,
+		routeUrl,
 		adapterName: env.adapterName,
 	});
 

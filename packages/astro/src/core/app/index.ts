@@ -107,6 +107,7 @@ export class App {
 			},
 			routeCache: new RouteCache(this.#logging),
 			site: this.#manifest.site,
+			base: this.#manifest.base,
 			ssr: true,
 			streaming,
 		});
