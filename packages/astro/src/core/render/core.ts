@@ -24,12 +24,14 @@ export type RenderPage = {
 
 export async function renderPage({ mod, renderContext, env, cookies }: RenderPage) {
 	if (routeIsRedirect(renderContext.route)) {
-		return new Response(null, {
+		const response = new Response(null, {
 			status: redirectRouteStatus(renderContext.route, renderContext.request.method),
 			headers: {
 				location: redirectRouteGenerate(renderContext.route, renderContext.params),
 			},
 		});
+		attachToResponse(response, cookies);
+		return response;
 	}
 
 	// Validate the page component before rendering the page

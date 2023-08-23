@@ -1,5 +1,7 @@
 ---
 const data = Astro.locals;
+const redirect = Astro.cookies.get("redirect");
+console.log(redirect);
 ---
 
 <html>
@@ -10,5 +12,6 @@ const data = Astro.locals;
 
 	<span>Index</span>
 	<p>{data?.name}</p>
+	<p>{redirect.value}</p>
 </body>
 </html>

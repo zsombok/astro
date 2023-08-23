@@ -48,12 +48,14 @@ export function createAPIContext({
 		generator: `Astro v${ASTRO_VERSION}`,
 		props,
 		redirect(path, status) {
-			return new Response(null, {
+			const response = new Response(null, {
 				status: status || 302,
 				headers: {
 					Location: path,
 				},
 			});
+			attachCookiesToResponse(response, context.cookies);
+			return response;
 		},
 		ResponseWithEncoding,
 		url: new URL(request.url),

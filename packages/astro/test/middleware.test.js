@@ -79,6 +79,13 @@ describe('Middleware in DEV mode', () => {
 		let html = await res.text();
 		expect(html).to.contain('<h1>it works</h1>');
 	});
+
+	it('cookies should be preserved when calling a redirect', async () => {
+		let res = await fixture.fetch('/redirect');
+		let html = await res.text();
+		console.log(res.headers.get('set-cookie'));
+		expect(html).to.contain('<p>cookie redirect set</p>');
+	});
 });
 
 describe('Middleware in PROD mode, SSG', () => {
