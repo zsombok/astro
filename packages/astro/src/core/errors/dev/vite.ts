@@ -8,6 +8,7 @@ import { AstroError, type ErrorWithMetadata } from '../errors.js';
 import { createSafeError } from '../utils.js';
 import type { SSRLoadedRenderer } from './../../../@types/astro.js';
 import { renderErrorMarkdown } from './utils.js';
+import { AstroErrorData } from '../index.js';
 
 export function enhanceViteSSRError({
 	error,
@@ -137,7 +138,7 @@ export async function getViteErrorPayload(err: ErrorWithMetadata): Promise<Astro
 	const message = renderErrorMarkdown(err.message.trim(), 'html');
 	const hint = err.hint ? renderErrorMarkdown(err.hint.trim(), 'html') : undefined;
 
-	const hasDocs = !!err.name;
+	const hasDocs = err.name in AstroErrorData;
 	const docslink = hasDocs
 		? `https://docs.astro.build/en/reference/errors/${getKebabErrorName(err.name)}/`
 		: undefined;
