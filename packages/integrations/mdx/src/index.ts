@@ -1,5 +1,5 @@
 import { markdownConfigDefaults, setVfileFrontmatter } from '@astrojs/markdown-remark';
-import type { PluggableList } from '@mdx-js/mdx/lib/core.js';
+import type { PluggableList } from 'unified';
 import type { AstroIntegration, ContentEntryType, HookParameters, SSRError } from 'astro';
 import astroJSXRenderer from 'astro/jsx/renderer.js';
 import { parse as parseESM } from 'es-module-lexer';
