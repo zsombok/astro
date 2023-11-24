@@ -436,5 +436,12 @@ describe('CSS', function () {
 			const el = $('#css-raw');
 			expect(el.text()).to.equal('.foo {color: red;}');
 		});
+
+		it('does not add a style tag for the CSS @import in the Astro style tag', async () => {
+			const html = await fixture.fetch('/style-tag-with-import/').then((res) => res.text());
+			const $1 = cheerio.load(html);
+			const styleTags = $1('style');
+			expect(styleTags.length).to.equal(1);
+		});
 	});
 });

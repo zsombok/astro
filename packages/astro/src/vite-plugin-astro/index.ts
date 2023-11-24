@@ -62,6 +62,10 @@ export default function astro({ settings, logger }: AstroPluginOptions): vite.Pl
 						throw new Error(`No Astro CSS at index ${query.index}`);
 					}
 
+					for (const dep of compileResult.cssDeps) {
+						this.addWatchFile(dep);
+					}
+
 					return {
 						code,
 						meta: {
@@ -144,10 +148,6 @@ export default function astro({ settings, logger }: AstroPluginOptions): vite.Pl
 			};
 
 			const transformResult = await cachedFullCompilation({ compileProps, logger });
-
-			for (const dep of transformResult.cssDeps) {
-				this.addWatchFile(dep);
-			}
 
 			const astroMetadata: AstroPluginMetadata['astro'] = {
 				clientOnlyComponents: transformResult.clientOnlyComponents,
