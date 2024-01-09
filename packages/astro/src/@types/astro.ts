@@ -1513,7 +1513,7 @@ export interface AstroUserConfig {
 	 * @description
 	 * TODO
 	 */
-	db?: object;
+	db?: Config.Database;
 
 	/**
 	 * @docs
@@ -2643,4 +2643,10 @@ declare global {
 		'astro-dev-overlay-icon': DevOverlayIcon;
 		'astro-dev-overlay-card': DevOverlayCard;
 	}
+}
+
+// eslint-disable-next-line  @typescript-eslint/no-namespace
+declare namespace Config {
+	// eslint-disable-next-line  @typescript-eslint/no-empty-interface
+	export interface Database {}
 }
