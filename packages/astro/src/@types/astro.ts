@@ -2645,8 +2645,9 @@ declare global {
 	}
 }
 
-// eslint-disable-next-line  @typescript-eslint/no-namespace
-declare namespace Config {
-	// eslint-disable-next-line  @typescript-eslint/no-empty-interface
-	export interface Database {}
+declare global {
+	// eslint-disable-next-line @typescript-eslint/no-namespace
+	namespace Config {
+		type Database = Record<string, any>;
+	}
 }
