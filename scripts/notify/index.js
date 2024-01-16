@@ -163,13 +163,22 @@ async function run() {
 	}
 	const content = await generateMessage();
 
-	await fetch(`${process.env.DISCORD_WEBHOOK}?wait=true`, {
-		method: 'POST',
-		body: JSON.stringify({ content }),
-		headers: {
-			'content-type': 'application/json',
-		},
-	});
+	try {
+		const res = await fetch(`${process.env.DISCORD_WEBHOOK}?wait=true`, {
+			method: 'POST',
+			body: JSON.stringify({ content }),
+			headers: {
+				'content-type': 'application/json',
+			},
+		});
+		if (res.status >= 400) {
+			const message = `${res.status}: ${res.statusText}\n${await res.text()}`
+			throw new Error(message);
+		}
+	} catch (e) {
+		console.error(e);
+		throw e;
+	}
 }
 
 run();
