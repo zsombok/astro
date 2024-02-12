@@ -47,7 +47,7 @@ export function vitePluginHoistedScripts(
 				settings.config.vite?.build &&
 				settings.config.vite.build.assetsInlineLimit !== undefined
 			) {
-				assetInlineLimit = settings.config.vite?.build.assetsInlineLimit;
+				assetInlineLimit = settings.config.vite?.build.assetsInlineLimit as number;
 			}
 
 			const considerInlining = new Map<string, OutputChunk>();

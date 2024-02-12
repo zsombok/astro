@@ -224,7 +224,7 @@ function rollupPluginAstroBuildCSS(options: PluginOptions): VitePlugin[] {
 						? true
 						: inlineConfig === 'never'
 							? false
-							: assetSize <= assetsInlineLimit;
+							: assetSize <= (assetsInlineLimit as number);
 
 				// there should be a single js object for each stylesheet,
 				// allowing the single reference to be shared and checked for duplicates

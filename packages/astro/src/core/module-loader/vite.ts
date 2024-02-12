@@ -50,7 +50,7 @@ export function createViteLoader(viteServer: vite.ViteDevServer): ModuleLoader {
 
 	return {
 		import(src) {
-			return viteServer.ssrLoadModule(src);
+			return viteServer.ssrFetchModule(src);
 		},
 		async resolveId(spec, parent) {
 			const ret = await viteServer.pluginContainer.resolveId(spec, parent);
